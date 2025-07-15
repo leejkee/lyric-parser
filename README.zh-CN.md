@@ -71,5 +71,21 @@ int main()
 ## 测试
 测试程序创建临时LRC文件，以指定编码写入，再以对应编码解析，测试一致性
 
+### 使用ScopedFile类创建临时文件
+`file_content`中每一个字符串被写入时，会自动在末尾添加换行符
+```c++
+{
+    std::string filename {"filename.lrc"};
+    std::vector<std::string> file_content{
+        "",
+        "",
+        ""
+    }
+    ScopedFile file_helper(filename);
+    file_helper.write_to_file(file_content, ScopedFile::Encoding::UTF8);
+}
+```
+当退出段区域时，`file_helper`对象会调用析构函数来删除临时文件
+
 ## License
 MIT

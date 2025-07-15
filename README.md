@@ -71,7 +71,24 @@ int main()
 > - `清明雨上-许嵩.lrc` is UTF-8 encoded
 
 ## Testing
+
 The test program creates temporary LRC files, writes them in the specified encoding, and parses them to verify correctness.
+
+### Using ScopedFile to create temporary files
+Each string in `file_content` will be written with a newline at the end.
+```cpp
+{
+    std::string filename {"filename.lrc"};
+    std::vector<std::string> file_content{
+        "",
+        "",
+        ""
+    };
+    ScopedFile file_helper(filename);
+    file_helper.write_to_file(file_content, ScopedFile::Encoding::UTF8);
+}
+```
+When the scope ends, the `file_helper` object will delete the temporary file in its destructor.
 
 ## License
 MIT
