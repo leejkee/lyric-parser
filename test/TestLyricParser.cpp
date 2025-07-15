@@ -4,7 +4,6 @@
 #define CATCH_CONFIG_MAIN
 #include <scopedfile.h>
 #include <lyricparser.h>
-#include <textfilehelper.h>
 #include <catch.hpp>
 
 TEST_CASE("LyricParserNormalTest", "Normal-LRC Test")
@@ -29,26 +28,23 @@ TEST_CASE("LyricParserNormalTest", "Normal-LRC Test")
 
     SECTION("Normal-LRC Test, Encode: UTF8")
     {
-        ScopedFile fileHelper(filename);// de-constructor auto delete file
+        ScopedFile fileHelper(filename);
         fileHelper.write_to_file(normal_lrc_toT, ScopedFile::Encoding::UTF8);
-        Badfish::FileKits::TextFileHelper textFileHelper(filename);
-        const Badfish::AudioToolkit::LyricParser lyricParser{textFileHelper};
-        REQUIRE(lyricParser.get_encoding() == Badfish::FileKits::Encoding::UTF8);
-        REQUIRE(lyricParser.is_enhanced() == false);
-        REQUIRE(lyricParser.get_lyric_tags() == expected_tags);
-        REQUIRE(lyricParser.get_lrc_text() == expected_content_lines);
+        const Badfish::AudioToolkit::LyricParser lyric_parser{filename};
+        REQUIRE(lyric_parser.is_enhanced() == false);
+        REQUIRE(lyric_parser.get_lyric_tags() == expected_tags);
+        REQUIRE(lyric_parser.get_lrc_text() == expected_content_lines);
     }
 
     SECTION("Normal-LRC Test, Encode: GBK")
     {
-        ScopedFile fileHelper(filename);// de-constructor auto delete file
+        ScopedFile fileHelper(filename);
         fileHelper.write_to_file(normal_lrc_toT, ScopedFile::Encoding::GBK);
-        const Badfish::FileKits::TextFileHelper textFileHelper(filename);
-        const Badfish::AudioToolkit::LyricParser lyricParser{textFileHelper};
-        REQUIRE(lyricParser.get_encoding() == Badfish::FileKits::Encoding::GBK);
-        REQUIRE(lyricParser.is_enhanced() == false);
-        REQUIRE(lyricParser.get_lyric_tags() == expected_tags);
-        REQUIRE(lyricParser.get_lrc_text() == expected_content_lines);
+        Badfish::AudioToolkit::LyricParser lyric_parser{filename};
+        lyric_parser.change_encoding(Badfish::FileKits::Encoding::GBK);
+        REQUIRE(lyric_parser.is_enhanced() == false);
+        REQUIRE(lyric_parser.get_lyric_tags() == expected_tags);
+        REQUIRE(lyric_parser.get_lrc_text() == expected_content_lines);
     }
 }
 
@@ -84,25 +80,22 @@ TEST_CASE("LyricParserEnhancedTest", "Enhanced-LRC Test")
     {
         ScopedFile fileHelper(filename);
         fileHelper.write_to_file(enhanced_lrc_toT, ScopedFile::Encoding::UTF8);
-        Badfish::FileKits::TextFileHelper textFileHelper(filename);
-        const Badfish::AudioToolkit::LyricParser lyricParser{textFileHelper};
+        const Badfish::AudioToolkit::LyricParser lyric_parser{filename};
 
-        REQUIRE(lyricParser.get_encoding() == Badfish::FileKits::Encoding::UTF8);
-        REQUIRE(lyricParser.is_enhanced() == true);
-        REQUIRE(lyricParser.get_lyric_tags() == expected_tags);
-        REQUIRE(lyricParser.get_lrc_text() == expected_content_lines);
+        REQUIRE(lyric_parser.is_enhanced() == true);
+        REQUIRE(lyric_parser.get_lyric_tags() == expected_tags);
+        REQUIRE(lyric_parser.get_lrc_text() == expected_content_lines);
     }
 
     SECTION("Enhanced-LRC Test, Encode: GBK")
     {
         ScopedFile fileHelper(filename);
         fileHelper.write_to_file(enhanced_lrc_toT, ScopedFile::Encoding::GBK);
-        Badfish::FileKits::TextFileHelper textFileHelper(filename);
-        const Badfish::AudioToolkit::LyricParser lyricParser{textFileHelper};
+        Badfish::AudioToolkit::LyricParser lyric_parser{filename};
+        lyric_parser.change_encoding(Badfish::FileKits::Encoding::GBK);
 
-        REQUIRE(lyricParser.get_encoding() == Badfish::FileKits::Encoding::GBK);
-        REQUIRE(lyricParser.is_enhanced() == true);
-        REQUIRE(lyricParser.get_lyric_tags() == expected_tags);
-        REQUIRE(lyricParser.get_lrc_text() == expected_content_lines);
+        REQUIRE(lyric_parser.is_enhanced() == true);
+        REQUIRE(lyric_parser.get_lyric_tags() == expected_tags);
+        REQUIRE(lyric_parser.get_lrc_text() == expected_content_lines);
     }
 }

@@ -3,12 +3,9 @@
 //
 #pragma once
 #include "textfilehelper.h"
+#include <memory>
 #include <string>
-#include <algorithm>
-#include <regex>
-#include <string_view>
 #include <vector>
-#include <filesystem>
 
 
 namespace Badfish::AudioToolkit
@@ -75,25 +72,20 @@ struct LyricLine
     }
 };
 
+class LyricParserPrivate;
 
 class LyricParser
 {
 public:
     LyricParser() = default;
 
-    LyricParser(const std::vector<std::string>& string_vector, FileKits::Encoding encoding);
-    explicit LyricParser(const FileKits::TextFileHelper& text_file);
+    explicit LyricParser(std::string_view file_path);
 
     ~LyricParser();
 
-    enum class EnhancedState
-    {
-        Uninitialized, True, False
-    };
-
     void parse_lrc();
 
-    void parse_lrc(std::ifstream& file_stream);
+    void load_file(std::string_view file_path);
 
     static void trim_string(std::string& str);
 
@@ -111,29 +103,15 @@ public:
 
     [[nodiscard]] bool is_enhanced() const;
 
-    [[nodiscard]] FileKits::Encoding get_encoding() const;
-
     void clear_result();
 
+    [[nodiscard]] std::string file_name() const;
+
+    void change_encoding(FileKits::Encoding t_encoding);
+
+    void print_info() const;
+
 private:
-    std::filesystem::path m_file_path;
-
-    std::vector<std::string> m_lyric_original;
-
-    std::vector<LyricLine> m_lyric_vector;
-
-    std::vector<std::string> m_lyric_tags;
-
-    EnhancedState m_is_enhanced{EnhancedState::Uninitialized};
-
-    FileKits::Encoding m_encoding{FileKits::Encoding::UNKNOWN};
-
-    static const std::regex s_regex_match_tag;
-
-    static const std::regex s_regex_search_enhanced_text;
-
-    static const std::regex s_regex_match_text;
-
-    static const std::regex s_regex_match_time;
+    std::unique_ptr<LyricParserPrivate> d;
 };
 }

@@ -5,19 +5,25 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <utility>
 
 #include <Windows.h>
 
 namespace Badfish::FileKits
 {
-TextFileHelper::TextFileHelper(const std::filesystem::path& filePath)
-    : m_path(filePath),
-      m_encoding(Encoding::UNKNOWN)
+TextFileHelper::TextFileHelper(const std::string_view filePath)
+    : m_path{filePath}
 {
-    if (read_file() == true)
-    {
-        detect_file_encoding();
-    }
+    read_file();
+}
+
+TextFileHelper::~TextFileHelper() = default;
+
+void TextFileHelper::load_file(const std::string_view file_path)
+{
+    m_path = std::filesystem::path(file_path);
+    m_content.clear();
+    read_file();
 }
 
 bool TextFileHelper::read_file()
@@ -45,56 +51,56 @@ bool TextFileHelper::read_file()
     return true;
 }
 
-void TextFileHelper::detect_file_encoding()
-{
-    if (m_content.empty())
-    {
-        m_encoding = Encoding::UNKNOWN;
-        return;
-    }
-    for (const auto& line : m_content)
-    {
-        switch (detect_str_encoding(line))
-        {
-        case Encoding::ASCII: {
-            break;
-        }
-        case Encoding::GBK: {
-            m_encoding = Encoding::GBK;
-            return;
-        }
-        case Encoding::UTF8: {
-            m_encoding = Encoding::UTF8;
-            return;
-        }
-        default: {
-            return;
-        }
-        }
-    }
-}
-
-
-Encoding TextFileHelper::detect_str_encoding(const std::string& str)
-{
-    if (is_ascii(str))
-    {
-        return Encoding::ASCII;
-    }
-    if (const std::string copy_str = convert_encoding(str
-        , Encoding::GBK
-        , Encoding::GBK); copy_str == str)
-    {
-        return Encoding::GBK;
-    }
-    if (const std::string copy_str = convert_encoding(str
-        , Encoding::UTF8
-        , Encoding::UTF8); copy_str == str)
-    {
-        return Encoding::UTF8;
-    }
-    return Encoding::UNKNOWN;
-}
+// void TextFileHelper::detect_file_encoding()
+// {
+//     if (m_content.empty())
+//     {
+//         m_encoding = Encoding::UNKNOWN;
+//         return;
+//     }
+//     for (const auto& line : m_content)
+//     {
+//         switch (detect_str_encoding(line))
+//         {
+//         case Encoding::ASCII: {
+//             break;
+//         }
+//         case Encoding::GBK: {
+//             m_encoding = Encoding::GBK;
+//             return;
+//         }
+//         case Encoding::UTF8: {
+//             m_encoding = Encoding::UTF8;
+//             return;
+//         }
+//         default: {
+//             return;
+//         }
+//         }
+//     }
+// }
+//
+//
+// Encoding TextFileHelper::detect_str_encoding(const std::string& str)
+// {
+//     if (is_ascii(str))
+//     {
+//         return Encoding::ASCII;
+//     }
+//     if (const std::string copy_str = convert_encoding(str
+//         , Encoding::GBK
+//         , Encoding::GBK); copy_str == str)
+//     {
+//         return Encoding::GBK;
+//     }
+//     if (const std::string copy_str = convert_encoding(str
+//         , Encoding::UTF8
+//         , Encoding::UTF8); copy_str == str)
+//     {
+//         return Encoding::UTF8;
+//     }
+//     return Encoding::UNKNOWN;
+// }
 
 bool TextFileHelper::is_ascii(const std::string& str)
 {
@@ -104,6 +110,28 @@ bool TextFileHelper::is_ascii(const std::string& str)
                        {
                            return (static_cast<unsigned char>(c) <= 0x7F);
                        });
+}
+
+std::string TextFileHelper::encoding_to_string(const Encoding& encoding)
+{
+    switch (encoding)
+    {
+        case Encoding::ASCII: {
+            return "ASCII";
+        }
+        case Encoding::GBK: {
+            return "GBK";
+        }
+        case Encoding::UTF8: {
+            return "UTF8";
+        }
+        case Encoding::UNKNOWN: {
+            return "UNKNOWN";
+        }
+        default: {
+            return {};
+        }
+    }
 }
 
 
@@ -122,6 +150,12 @@ int TextFileHelper::encoding_to_codepage(const Encoding encoding)
     }
     }
 }
+
+std::string TextFileHelper::file_name() const
+{
+    return m_path.filename().string();
+}
+
 
 // Linux todo
 

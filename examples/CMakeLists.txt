@@ -1,0 +1,4 @@
+cmake_minimum_required(VERSION 3.20)
+project(lyric_parser_example LANGUAGES CXX)
+add_executable(lyric_parser_example main.cpp)
+target_link_libraries(lyric_parser_example PRIVATE lyric_parser)
