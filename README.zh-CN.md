@@ -26,14 +26,14 @@ LRC Lyric Parser 是一个用 C++17 编写的 LRC 歌词文件解析库。支持
 - 编译测试：`-DBUILD_TESTS=ON`
 - 编译示例：`-DBUILD_EXAMPLES=ON`
 
-#### 只编译主库（默认行为）
+#### 只编译`lyric-parser`
 ```sh
 mkdir build && cd build
 cmake ..
 cmake --build .
 ```
 
-#### 编译并包含测试和示例
+#### 编译全部target，包含测试和示例
 ```sh
 mkdir build && cd build
 cmake -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON ..

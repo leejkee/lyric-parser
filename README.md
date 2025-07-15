@@ -28,7 +28,7 @@ By default, tests and examples are not built. Enable them manually if needed:
 - Build tests: `-DBUILD_TESTS=ON`
 - Build examples: `-DBUILD_EXAMPLES=ON`
 
-#### Build library only (default)
+#### Build `lyric-parser` only (default)
 ```sh
 mkdir build && cd build
 cmake ..
