@@ -5,44 +5,42 @@
 [![Tests 100% Passed](https://img.shields.io/badge/tests-100%25%20passing-brightgreen?style=flat-square&logo=checkmarx)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
-## [简体中文](./README.zh-CN.md)
+## 简介
+LRC Lyric Parser 是一个用 C++17 编写的 LRC 歌词文件解析库。支持`常见LRC格式`和[`增强型LRC`](https://en.wikipedia.org/wiki/LRC_(file_format))
 
-## Introduction
-LRC Lyric Parser is a C++17 library for parsing standard and enhanced LRC lyric files. It supports both common LRC format and [enhanced LRC](https://en.wikipedia.org/wiki/LRC_(file_format)).
+## 特性
+- 支持`标准LRC`歌词格式和`增强型LRC`歌词格式
+- 可作为 `CMake target` 直接集成到你的项目中
+- 已在 Windows 11 和 Linux 上通过测试
+- 单元测试覆盖
 
-## Features
-- Supports standard and enhanced LRC lyric formats
-- Can be integrated as a CMake target in your project
-- Tested on Windows 11 and Linux
-- Unit test coverage
+## 安装
 
-## Installation
+### 依赖
+- 标准C++17
 
-### Dependencies
-- C++17
+### 构建
 
-### Build
+本项目默认不编译测试（test）和示例（examples），如需编译请手动开启：
 
-By default, tests and examples are not built. Enable them manually if needed:
+- 编译测试：`-DBUILD_TESTS=ON`
+- 编译示例：`-DBUILD_EXAMPLES=ON`
 
-- Build tests: `-DBUILD_TESTS=ON`
-- Build examples: `-DBUILD_EXAMPLES=ON`
-
-#### Build library only (default)
+#### 只编译主库（默认行为）
 ```sh
 mkdir build && cd build
 cmake ..
 cmake --build .
 ```
 
-#### Build with tests and examples
+#### 编译并包含测试和示例
 ```sh
 mkdir build && cd build
 cmake -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON ..
 cmake --build .
 ```
 
-## Usage Example
+## 使用示例
 ```cpp
 #include <lyricparser.h>
 #include <string>
@@ -66,12 +64,12 @@ int main()
 }
 ```
 
-> Example notes:
-> - `成全 - 刘若英.lrc` is GBK encoded
-> - `清明雨上-许嵩.lrc` is UTF-8 encoded
+> 示例说明：
+> - `成全 - 刘若英.lrc` 文件编码为 GBK
+> - `清明雨上-许嵩.lrc` 文件编码为 UTF-8
 
-## Testing
-The test program creates temporary LRC files, writes them in the specified encoding, and parses them to verify correctness.
+## 测试
+测试程序创建临时LRC文件，以指定编码写入，再以对应编码解析，测试一致性
 
 ## License
 MIT
