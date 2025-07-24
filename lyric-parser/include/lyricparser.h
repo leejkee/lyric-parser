@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <optional>
 
 
 namespace Badfish::AudioToolkit
@@ -40,11 +41,14 @@ namespace Badfish::AudioToolkit
 
 struct LyricLine
 {
-    std::int64_t m_start_ms;
+    std::optional<int64_t> m_start_ms;
 
     std::string m_text;
 
-    LyricLine() : LyricLine(0, std::string()){}
+    explicit LyricLine(std::string&& text)
+        :m_text(std::move(text))
+    {
+    }
 
     LyricLine(const std::int64_t time_ms
               , std::string&& text)
@@ -69,6 +73,20 @@ struct LyricLine
     bool operator!=(const LyricLine& other) const
     {
         return (m_start_ms != other.m_start_ms) || (m_text != other.m_text);
+    }
+
+    bool isTag() const {
+        return !m_start_ms.has_value();
+    }
+
+    bool isText() const
+    {
+        return m_start_ms.has_value();
+    }
+
+    int64_t start_ms() const
+    {
+        return m_start_ms.value();
     }
 };
 
@@ -97,9 +115,11 @@ public:
                                        , std::string_view sec
                                        , std::string_view ms);
 
-    [[nodiscard]] std::vector<LyricLine> get_lrc_text() const;
+    [[nodiscard]] std::vector<LyricLine> get_lrc() const;
 
-    [[nodiscard]] std::vector<std::string> get_lyric_tags() const;
+    [[nodiscard]] std::vector<std::string> get_tags() const;
+
+    [[nodiscard]] std::vector<LyricLine> get_text() const;
 
     [[nodiscard]] bool is_enhanced() const;
 

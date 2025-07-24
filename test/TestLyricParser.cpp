@@ -32,8 +32,8 @@ TEST_CASE("LyricParserNormalTest", "Normal-LRC Test")
         fileHelper.write_to_file(normal_lrc_toT, ScopedFile::Encoding::UTF8);
         const Badfish::AudioToolkit::LyricParser lyric_parser{filename};
         REQUIRE(lyric_parser.is_enhanced() == false);
-        REQUIRE(lyric_parser.get_lyric_tags() == expected_tags);
-        REQUIRE(lyric_parser.get_lrc_text() == expected_content_lines);
+        REQUIRE(lyric_parser.get_tags() == expected_tags);
+        REQUIRE(lyric_parser.get_text() == expected_content_lines);
     }
 
     SECTION("Normal-LRC Test, Encode: GBK")
@@ -43,8 +43,8 @@ TEST_CASE("LyricParserNormalTest", "Normal-LRC Test")
         Badfish::AudioToolkit::LyricParser lyric_parser{filename};
         lyric_parser.change_encoding(Badfish::FileKits::Encoding::GBK);
         REQUIRE(lyric_parser.is_enhanced() == false);
-        REQUIRE(lyric_parser.get_lyric_tags() == expected_tags);
-        REQUIRE(lyric_parser.get_lrc_text() == expected_content_lines);
+        REQUIRE(lyric_parser.get_tags() == expected_tags);
+        REQUIRE(lyric_parser.get_text() == expected_content_lines);
     }
 }
 
@@ -83,8 +83,8 @@ TEST_CASE("LyricParserEnhancedTest", "Enhanced-LRC Test")
         const Badfish::AudioToolkit::LyricParser lyric_parser{filename};
 
         REQUIRE(lyric_parser.is_enhanced() == true);
-        REQUIRE(lyric_parser.get_lyric_tags() == expected_tags);
-        REQUIRE(lyric_parser.get_lrc_text() == expected_content_lines);
+        REQUIRE(lyric_parser.get_tags() == expected_tags);
+        REQUIRE(lyric_parser.get_text() == expected_content_lines);
     }
 
     SECTION("Enhanced-LRC Test, Encode: GBK")
@@ -95,7 +95,7 @@ TEST_CASE("LyricParserEnhancedTest", "Enhanced-LRC Test")
         lyric_parser.change_encoding(Badfish::FileKits::Encoding::GBK);
 
         REQUIRE(lyric_parser.is_enhanced() == true);
-        REQUIRE(lyric_parser.get_lyric_tags() == expected_tags);
-        REQUIRE(lyric_parser.get_lrc_text() == expected_content_lines);
+        REQUIRE(lyric_parser.get_tags() == expected_tags);
+        REQUIRE(lyric_parser.get_text() == expected_content_lines);
     }
 }

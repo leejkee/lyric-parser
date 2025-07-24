@@ -30,8 +30,6 @@ public:
 
     std::vector<LyricLine> m_lyric_vector;
 
-    std::vector<std::string> m_lyric_tags;
-
     EnhancedState m_is_enhanced{EnhancedState::Uninitialized};
 
     inline static const std::regex s_regex_match_tag{R"(\[(.*)\])"};
@@ -81,7 +79,7 @@ void LyricParser::parse_lrc()
         , results_match
         , LyricParserPrivate::s_regex_match_tag))
     {
-        d->m_lyric_tags.emplace_back(results_match[1].str());
+        d->m_lyric_vector.emplace_back(results_match[1].str());
         ++o_it;
     }
     // 1.
@@ -148,15 +146,40 @@ void LyricParser::load_file(const std::string_view file_path)
     parse_lrc();
 }
 
-std::vector<LyricLine> LyricParser::get_lrc_text() const
+std::vector<LyricLine> LyricParser::get_lrc() const
 {
     return d->m_lyric_vector;
 }
 
-std::vector<std::string> LyricParser::get_lyric_tags() const
-{
-    return d->m_lyric_tags;
+std::vector<std::string> LyricParser::get_tags() const{
+    std::vector<std::string> tags;
+    for (const auto& line : d->m_lyric_vector)
+    {
+        if (line.isTag())
+        {
+            tags.emplace_back(line.m_text);
+        }
+        else{
+            break;
+        }
+    }
+    return tags;
 }
+
+std::vector<LyricLine> LyricParser::get_text() const{
+    std::vector<LyricLine> text;
+    auto it = d->m_lyric_vector.begin();
+    while(it != d->m_lyric_vector.end() && it->isTag())
+    {
+        ++it;
+    }
+    for (; it != d->m_lyric_vector.end(); ++it)
+    {
+        text.emplace_back(*it);
+    }
+    return text;
+}
+
 
 bool LyricParser::is_enhanced() const
 {
@@ -193,7 +216,6 @@ std::int64_t LyricParser::time_to_ms(
 void LyricParser::clear_result()
 {
     d->m_is_enhanced = LyricParserPrivate::EnhancedState::Uninitialized;
-    d->m_lyric_tags.clear();
     d->m_lyric_vector.clear();
 }
 
@@ -240,16 +262,6 @@ std::string LyricParser::file_name() const
 
 void LyricParser::change_encoding(const FileKits::Encoding t_encoding)
 {
-    if (!d->m_lyric_tags.empty())
-    {
-        for (auto& tag : d->m_lyric_tags)
-        {
-            tag = FileKits::TextFileHelper::convert_encoding(tag
-                , t_encoding
-                , FileKits::Encoding::UTF8);
-        }
-    }
-
     if (!d->m_lyric_vector.empty())
     {
         for (auto& lyric : d->m_lyric_vector)
@@ -269,13 +281,6 @@ void LyricParser::change_encoding(const FileKits::Encoding t_encoding)
 void LyricParser::print_info() const
 {
     std::cout << "File name: " << file_name() << std::endl;
-    std::cout << "Tags:" << std::endl;
-    for (const auto& tag : d->m_lyric_tags)
-    {
-        std::cout << tag << std::endl;
-    }
-    std::cout << "Lyric text:" << std::endl;
-
     for (const auto& lyric : d->m_lyric_vector)
     {
         std::cout << lyric.m_text << std::endl;
