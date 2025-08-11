@@ -45,6 +45,8 @@ struct LyricLine
 
     std::string m_text;
 
+    LyricLine() = default;
+
     explicit LyricLine(std::string&& text)
         :m_text(std::move(text))
     {
@@ -75,16 +77,16 @@ struct LyricLine
         return (m_start_ms != other.m_start_ms) || (m_text != other.m_text);
     }
 
-    bool isTag() const {
+    [[nodiscard]] bool isTag() const {
         return !m_start_ms.has_value();
     }
 
-    bool isText() const
+    [[nodiscard]] bool isText() const
     {
         return m_start_ms.has_value();
     }
 
-    int64_t start_ms() const
+    [[nodiscard]] int64_t start_ms() const
     {
         return m_start_ms.value();
     }
@@ -95,7 +97,7 @@ class LyricParserPrivate;
 class LyricParser
 {
 public:
-    LyricParser() = default;
+    LyricParser();
 
     explicit LyricParser(std::string_view file_path);
 

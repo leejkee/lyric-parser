@@ -17,15 +17,6 @@ public:
         Uninitialized, True, False
     };
 
-    explicit LyricParserPrivate(const std::string_view filePath)
-        : m_file_helper{filePath}
-    {
-    }
-
-    ~LyricParserPrivate();
-
-    LyricParserPrivate(const LyricParserPrivate&) = delete;
-
     FileKits::TextFileHelper m_file_helper;
 
     std::vector<LyricLine> m_lyric_vector;
@@ -47,11 +38,14 @@ public:
     };
 };
 
-LyricParserPrivate::~LyricParserPrivate() = default;
+LyricParser::LyricParser() : d(std::make_unique<LyricParserPrivate>())
+{
+}
 
 LyricParser::LyricParser(const std::string_view file_path)
-    : d(std::make_unique<LyricParserPrivate>(file_path))
+    : d(std::make_unique<LyricParserPrivate>())
 {
+    d->m_file_helper.load_file(file_path);
     parse_lrc();
 }
 
