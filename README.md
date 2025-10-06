@@ -8,34 +8,30 @@
 ## [简体中文](./README.zh-CN.md)
 
 ## Introduction
-LRC Lyric Parser is a C++17 library for parsing standard and enhanced LRC lyric files. It supports both common LRC format and [enhanced LRC](https://en.wikipedia.org/wiki/LRC_(file_format)).
+
+> - `LRC Lyric Parser` is a C++17 library for parsing LRC lyric files. It supports both the **standard LRC format** and the **[enhanced LRC format](https://en.wikipedia.org/wiki/LRC_(file_format))**.
+> - This project includes functionality to convert files from **GBK encoding** to **UTF-8 encoding**.
 
 ## Features
-- Supports standard and enhanced LRC lyric formats
-- Can be integrated as a CMake target in your project
-- Tested on Windows 11 and Linux
-- Unit test coverage
-
-## Installation
+- Supports both **standard LRC** and **enhanced LRC** lyric formats
+- Integrates directly into your project as a **CMake target**
+- Cross-platform support for **Windows 11** and **Linux**
 
 ### Dependencies
-- C++17
+- Standard **C++17**
 
-### Build
+### Building
+- Tests: `-DBUILD_TESTS=ON`
+- Examples: `-DBUILD_EXAMPLES=ON`
 
-By default, tests and examples are not built. Enable them manually if needed:
-
-- Build tests: `-DBUILD_TESTS=ON`
-- Build examples: `-DBUILD_EXAMPLES=ON`
-
-#### Build `lyric-parser` only (default)
+#### Build only the `lyric-parser` library (default behavior)
 ```sh
 mkdir build && cd build
 cmake ..
 cmake --build .
 ```
 
-#### Build with tests and examples
+#### Build all targets, including tests and examples
 ```sh
 mkdir build && cd build
 cmake -DBUILD_TESTS=ON -DBUILD_EXAMPLES=ON ..
@@ -43,7 +39,10 @@ cmake --build .
 ```
 
 ## Usage Example
+Add this project as a subdirectory in your project's `CMakeLists.txt` using `add_subdirectory()`:
+
 ```cpp
+// main.cpp
 #include <lyricparser.h>
 #include <string>
 
@@ -51,27 +50,54 @@ int main()
 {
     using namespace Badfish;
 
-    // file with GBK encoding
-    const std::string file_1{"../../examples/成全 - 刘若英.lrc"};
+    // file with `GBK` encoding
+    const std::string file_1{"../../examples/ChengQuan - LiuRuoYing.lrc"};
 
-    // file with UTF8 encoding
-    const std::string file_2{"../../examples/清明雨上-许嵩.lrc"};
+    // file with `UTF-8` encoding
+    const std::string file_2{"../../examples/QingMingYuShang - XuSong.lrc"};
 
     AudioToolkit::LyricParser parser(file_1);
-    parser.change_encoding(FileKits::Encoding::GBK); // file_1 is GBK encoded
+    parser.change_encoding(FileKits::Encoding::GBK); // file_1 is `GBK` encoded
     parser.print_info();
 
-    parser.load_file(file_2); // file_2 is UTF-8 encoded
+    parser.load_file(file_2); // file_2 is `UTF-8` encoded
     parser.print_info();
 }
 ```
 
-> Example notes:
-> - `成全 - 刘若英.lrc` is GBK encoded
-> - `清明雨上-许嵩.lrc` is UTF-8 encoded
+> Note:
+> - `成全 - 刘若英.lrc` is encoded in **GBK**
+> - `清明雨上-许嵩.lrc` is encoded in **UTF-8**
+> - The paths for `file_1` and `file_2` assume the files reside in the project root directory, while the executable is located under `build/examples/`
+
+- Run examples
+```sh
+cd build/examples
+./lyric_parser_examples
+```
 
 ## Testing
-The test program creates temporary LRC files, writes them in the specified encoding, and parses them to verify correctness.
+The test program creates temporary LRC files, writes content in a specified encoding, then parses them using the corresponding encoding to verify consistency.
+
+### Using the `ScopedFile` class to create temporary files
+Each string in `file_content` is automatically appended with a newline character when written:
+```cpp
+{
+    std::string filename {"filename.lrc"};
+    std::vector<std::string> file_content{
+        "",
+        "",
+        ""
+    };
+    ScopedFile file_helper(filename);
+    file_helper.write_to_file(file_content, ScopedFile::Encoding::UTF8);
+}
+```
+When exiting the scope, the temporary test file is automatically deleted upon destruction of the `ScopedFile` object.
+
+## Todo
+- [ ] Support unformatted but complete LRC files containing valid timestamps (e.g., files without line breaks)
+- [ ] Fully support parsing of enhanced LRC format, including per-character timestamps within a line
 
 ## License
 MIT

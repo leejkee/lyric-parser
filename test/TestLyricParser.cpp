@@ -2,7 +2,7 @@
 // Created by 31305 on 2025/6/24.
 //
 #define CATCH_CONFIG_MAIN
-#include <scopedfile.h>
+#include "scopedfile.h"
 #include <lyricparser.h>
 #include <catch.hpp>
 

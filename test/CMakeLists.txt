@@ -2,6 +2,7 @@ message(STATUS "Test Module LyricParser: ON")
 
 ## TestLyricParser
 add_executable(TestLyricParser
+        scopedfile.cpp
         TestLyricParser.cpp
 )
 target_link_libraries(TestLyricParser PRIVATE catch2 lyric_parser)

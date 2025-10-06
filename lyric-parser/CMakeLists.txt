@@ -1,6 +1,5 @@
 add_library(lyric_parser STATIC
         ${CMAKE_CURRENT_SOURCE_DIR}/lyricparser.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/scopedfile.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/textfilehelper.cpp
 )
 

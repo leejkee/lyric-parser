@@ -1,7 +1,7 @@
 //
 // Created by 31305 on 2025/6/28.
 //
-#include <scopedfile.h>
+#include "scopedfile.h"
 #include <fstream>
 #include <iostream>
 
@@ -165,7 +165,6 @@ bool ScopedFile::write_to_file_iconv(std::string_view content
     {
     case Encoding::UTF8:
         target_encoding_str = "UTF-8";
-        // add_bom = true;
         break;
     case Encoding::GBK:
         target_encoding_str = "GBK";
@@ -219,15 +218,6 @@ bool ScopedFile::write_to_file_iconv(std::string_view content
                 std::endl;
         return false;
     }
-
-    // // Write BOM
-    // if (add_bom)
-    // {
-    //     unsigned char bom[] = {0xEF, 0xBB, 0xBF};
-    //     outFile.write(reinterpret_cast<const char*>(bom), sizeof(bom));
-    //     unsigned char bom[] = {0xFF, 0xFE};
-    //     outFile.write(reinterpret_cast<const char*>(bom), sizeof(bom));
-    // }
 
     outFile.write(output_bytes.data(), converted_bytes);
     outFile.close();

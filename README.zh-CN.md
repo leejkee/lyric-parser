@@ -6,28 +6,23 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 ## 简介
-`LRC Lyric Parser` 是一个用 `C++17` 编写的 LRC 歌词文件解析库。支持 `标准LRC格式` 和 [`增强型LRC`](https://en.wikipedia.org/wiki/LRC_(file_format))。
+
+> - `LRC Lyric Parser` 是一个用 `C++17` 编写的 LRC 歌词文件解析库。支持 `标准LRC格式` 和 [`增强型LRC`](https://en.wikipedia.org/wiki/LRC_(file_format))。
+> - 本项目实现了从`GBK`编码转换为`UTF8`编码的功能
 
 ## 特性
 - 支持 `标准LRC` 歌词格式和 `增强型LRC` 歌词格式
-- 可作为 `CMake target` 直接集成到你的项目中
-- 已在 `Windows 11` 和 `Linux` 上通过测试
-- 单元测试覆盖
-
-## 安装
+- 作为 `CMake target` 直接集成到你的项目中
+- 跨平台 `Windows11` & `Linux`
 
 ### 依赖
 - `标准C++17`
 
 ### 构建
+- 测试：`-DBUILD_TESTS=ON`
+- 示例：`-DBUILD_EXAMPLES=ON`
 
-
-本项目默认不编译 `test` 和 `examples`，如需编译请手动开启：
-
-- 编译测试：`-DBUILD_TESTS=ON`
-- 编译示例：`-DBUILD_EXAMPLES=ON`
-
-#### 只编译 `lyric-parser`（默认行为）
+#### 只编译解析库 `lyric-parser`（默认行为）
 ```sh
 mkdir build && cd build
 cmake ..
@@ -44,6 +39,7 @@ cmake --build .
 ## 使用示例
 在你的项目 `CMakeLists.txt` 中以子目录形式添加本项目，使用 `add_subdirectory()` 即可：
 ```cpp
+// main.cpp
 #include <lyricparser.h>
 #include <string>
 
@@ -65,11 +61,16 @@ int main()
     parser.print_info();
 }
 ```
-
 > 示例说明：
 > - `成全 - 刘若英.lrc` 文件编码为 `GBK`
 > - `清明雨上-许嵩.lrc` 文件编码为 `UTF-8`
+> - `file_1`和`file_2`两个文件路径是由于其存放于项目根目录，而可执行文件位于`build/examples/`
 
+- 运行示例
+```sh
+cd build/examples
+./lyric_parser_examples
+```
 ## 测试
 测试程序创建临时 `LRC` 文件，以指定编码写入，再以对应编码解析，测试一致性。
 
@@ -87,7 +88,11 @@ int main()
     file_helper.write_to_file(file_content, ScopedFile::Encoding::UTF8);
 }
 ```
-当退出作用域时，`file_helper` 对象会调用析构函数来删除临时文件。
+当退出代码块时，用于测试而被生成的临时文件会随着`ScopedFile`类的析构函数调用而被删除。
+
+## Todo
+- [ ] 支持未格式化但是包含完整时间戳的lrc文件（比如整个文件没有换行符）
+- [ ] 支持增强型LRC的完全解析，即单句逐字时间戳
 
 ## License
 MIT
