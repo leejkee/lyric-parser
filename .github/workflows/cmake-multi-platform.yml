@@ -1,0 +1,75 @@
+# .github/workflows/cmake.yml
+name: CMake Build & Test (Lyric-Parser)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_and_test:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+
+      # Test on Ubuntu (Linux) and Windows
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        build_type: [Release] # Use 'Debug' or 'RelWithDebInfo' to test other build types
+
+        # Define the compiler to use for each OS
+        # On Ubuntu, we will run once with GCC and once with Clang
+        # On Windows, we use the default MSVC compiler (cl)
+        c_compiler: [gcc, clang, cl]
+
+        # Configure which compiler runs on which OS
+        include:
+          - os: windows-latest
+            c_compiler: cl
+          - os: ubuntu-latest
+            c_compiler: gcc
+          - os: ubuntu-latest
+            c_compiler: clang
+
+        # Exclude invalid combinations (e.g., running GCC on Windows)
+        exclude:
+          - os: windows-latest
+            c_compiler: gcc
+          - os: windows-latest
+            c_compiler: clang
+          - os: ubuntu-latest
+            c_compiler: cl
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set reusable strings
+        # Define the common build directory name
+        id: strings
+        shell: bash
+        run: |
+          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+
+      - name: Configure CMake (with Tests and Examples)
+        # 1. Use -DBUILD_TESTS=ON and -DBUILD_EXAMPLES=ON
+        # 2. Use the correct C compiler from the matrix
+        run: |
+          mkdir -p ${{ steps.strings.outputs.build-output-dir }}
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} \
+                -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
+                -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+                -DBUILD_TESTS=ON \
+                -DBUILD_EXAMPLES=ON \
+                -S ${{ github.workspace }}
+
+      - name: Build
+        # Build your program and all targets (including tests and examples)
+        run: cmake --build ${{ steps.strings.outputs.build-output-dir }} --config ${{ matrix.build_type }}
+
+      - name: Test (TestLyricParser)
+        working-directory: ${{ steps.strings.outputs.build-output-dir }}
+        # Use CTest to run the specific test target
+        # We use --build-config for multi-config generators (like on Windows)
+        run: ctest --build-config ${{ matrix.build_type }} -R TestLyricParser
