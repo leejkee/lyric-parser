@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.20)
 project(LRC_Parser LANGUAGES CXX)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-option(BUILD_TESTS "Build tests" OFF)
-option(BUILD_EXAMPLES "Build examples" OFF)
+option(BUILD_TESTS "Build tests" ON)
+option(BUILD_EXAMPLES "Build examples" ON)
 
 add_subdirectory(lyric-parser)
 

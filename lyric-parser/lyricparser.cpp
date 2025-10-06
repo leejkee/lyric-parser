@@ -5,8 +5,6 @@
 #include <iostream>
 #include <regex>
 
-#include <windows.h>
-
 namespace Badfish::AudioToolkit
 {
 class LyricParserPrivate
@@ -174,7 +172,6 @@ std::vector<LyricLine> LyricParser::get_text() const{
     return text;
 }
 
-
 bool LyricParser::is_enhanced() const
 {
     return d->m_is_enhanced == LyricParserPrivate::EnhancedState::True;
@@ -254,7 +251,7 @@ std::string LyricParser::file_name() const
     return d->m_file_helper.file_name();
 }
 
-void LyricParser::change_encoding(const FileKits::Encoding t_encoding)
+void LyricParser::change_encoding_utf8(const FileKits::Encoding t_encoding)
 {
     if (!d->m_lyric_vector.empty())
     {

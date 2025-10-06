@@ -38,11 +38,9 @@ public:
 
     [[nodiscard]] std::string file_name() const;
 
-#if defined(_WIN32) || defined(_WIN64)
     static std::string convert_encoding(const std::string& o_str
                                         , Encoding o_encoding
                                         , Encoding t_encoding);
-#endif
 
 private:
     std::filesystem::path m_path;
@@ -52,8 +50,6 @@ private:
     std::vector<std::string> m_content;
 
     // static Encoding detect_str_encoding(const std::string& str);
-
-    static int encoding_to_codepage(Encoding encoding);
 
     // void detect_file_encoding();
 

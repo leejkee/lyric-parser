@@ -26,10 +26,12 @@ public:
     bool write_to_file(const std::vector<std::string>& content_lines
                        , Encoding encoding = Encoding::UTF8);
 
+#if defined (_WIN32) || defined(_WIN64)
     bool write_to_file_winapi(const std::string& content, Encoding target_encoding);
+#endif
 
 #if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-    bool write_to_file_iconv(const std::string& content, Encoding encoding);
+    bool write_to_file_iconv(std::string_view content, Encoding encoding);
 #endif
 
 private:

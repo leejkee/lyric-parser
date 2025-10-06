@@ -15,7 +15,7 @@ int main()
     const std::string file_2{"../../examples/清明雨上-许嵩.lrc"};
 
     AudioToolkit::LyricParser parser(file_1);
-    parser.change_encoding(FileKits::Encoding::GBK);
+    parser.change_encoding_utf8(FileKits::Encoding::GBK);
     parser.print_info();
 
     parser.load_file(file_2);

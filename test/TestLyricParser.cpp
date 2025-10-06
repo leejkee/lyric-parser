@@ -41,7 +41,7 @@ TEST_CASE("LyricParserNormalTest", "Normal-LRC Test")
         ScopedFile fileHelper(filename);
         fileHelper.write_to_file(normal_lrc_toT, ScopedFile::Encoding::GBK);
         Badfish::AudioToolkit::LyricParser lyric_parser{filename};
-        lyric_parser.change_encoding(Badfish::FileKits::Encoding::GBK);
+        lyric_parser.change_encoding_utf8(Badfish::FileKits::Encoding::GBK);
         REQUIRE(lyric_parser.is_enhanced() == false);
         REQUIRE(lyric_parser.get_tags() == expected_tags);
         REQUIRE(lyric_parser.get_text() == expected_content_lines);
@@ -92,7 +92,7 @@ TEST_CASE("LyricParserEnhancedTest", "Enhanced-LRC Test")
         ScopedFile fileHelper(filename);
         fileHelper.write_to_file(enhanced_lrc_toT, ScopedFile::Encoding::GBK);
         Badfish::AudioToolkit::LyricParser lyric_parser{filename};
-        lyric_parser.change_encoding(Badfish::FileKits::Encoding::GBK);
+        lyric_parser.change_encoding_utf8(Badfish::FileKits::Encoding::GBK);
 
         REQUIRE(lyric_parser.is_enhanced() == true);
         REQUIRE(lyric_parser.get_tags() == expected_tags);

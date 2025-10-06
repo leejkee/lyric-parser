@@ -155,17 +155,17 @@ bool ScopedFile::write_to_file_winapi(const std::string& content
 // Private helper for iconv implementation
 // -----------------------------------------------------------------------------
 #if defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-bool FileHelper::write_to_file_iconv(const std::string& content
+bool ScopedFile::write_to_file_iconv(std::string_view content
                                      , Encoding encoding)
 {
     const char* target_encoding_str = nullptr;
-    bool add_bom = false;
+    // bool add_bom = false;
 
     switch (encoding)
     {
     case Encoding::UTF8:
         target_encoding_str = "UTF-8";
-        add_bom = true;
+        // add_bom = true;
         break;
     case Encoding::GBK:
         target_encoding_str = "GBK";
@@ -183,13 +183,12 @@ bool FileHelper::write_to_file_iconv(const std::string& content
         return false;
     }
 
-    char* in_buf_ptr = const_cast<char*>(content.c_str());
+    char* in_buf_ptr = const_cast<char*>(content.data());
     size_t in_bytes_left = content.length();
 
     // Allocate output buffer with an educated guess
     // For UTF-8 to UTF-16, it can be up to 2x. For others, it might be more.
-    // Plus 4 for safety margin and potential BOM.
-    size_t out_buf_size = in_bytes_left * 2 + 4;
+    size_t out_buf_size = in_bytes_left * 2;
     std::vector<char> output_bytes(out_buf_size);
     char* out_buf_ptr = output_bytes.data();
     size_t out_bytes_left = out_buf_size;
@@ -221,14 +220,14 @@ bool FileHelper::write_to_file_iconv(const std::string& content
         return false;
     }
 
-    // Write BOM
-    if (add_bom)
-    {
-        unsigned char bom[] = {0xEF, 0xBB, 0xBF};
-        outFile.write(reinterpret_cast<const char*>(bom), sizeof(bom));
-        unsigned char bom[] = {0xFF, 0xFE};
-        outFile.write(reinterpret_cast<const char*>(bom), sizeof(bom));
-    }
+    // // Write BOM
+    // if (add_bom)
+    // {
+    //     unsigned char bom[] = {0xEF, 0xBB, 0xBF};
+    //     outFile.write(reinterpret_cast<const char*>(bom), sizeof(bom));
+    //     unsigned char bom[] = {0xFF, 0xFE};
+    //     outFile.write(reinterpret_cast<const char*>(bom), sizeof(bom));
+    // }
 
     outFile.write(output_bytes.data(), converted_bytes);
     outFile.close();

@@ -7,7 +7,12 @@
 #include <iostream>
 #include <utility>
 
+#if defined (_WIN32) || defined(_WIN64)
 #include <Windows.h>
+#elif defined(__linux__) || defined(__unix__) || defined(__APPLE__)
+#include <iconv.h>
+#include <cstring>
+#endif
 
 namespace Badfish::FileKits
 {
@@ -134,36 +139,33 @@ std::string TextFileHelper::encoding_to_string(const Encoding& encoding)
     }
 }
 
-
-int TextFileHelper::encoding_to_codepage(const Encoding encoding)
-{
-    switch (encoding)
-    {
-    case Encoding::UTF8: {
-        return CP_UTF8;
-    }
-    case Encoding::GBK: {
-        return 936;
-    }
-    default: {
-        return 0;
-    }
-    }
-}
-
 std::string TextFileHelper::file_name() const
 {
     return m_path.filename().string();
 }
 
 
-// Linux todo
 
 #if defined(_WIN32) || defined(_WIN64)
 std::string TextFileHelper::convert_encoding(const std::string& o_str
                                              , const Encoding o_encoding
                                              , const Encoding t_encoding)
 {
+    auto encoding_to_codepage = [](const Encoding encoding) -> UINT
+    {
+        switch (encoding)
+        {
+        case Encoding::UTF8: {
+            return CP_UTF8;
+        }
+        case Encoding::GBK: {
+            return 936;
+        }
+        default: {
+            return 0;
+        }
+        }
+    };
     const UINT o_code_page = encoding_to_codepage(o_encoding);
     const UINT t_code_page = encoding_to_codepage(t_encoding);
 
@@ -199,6 +201,76 @@ std::string TextFileHelper::convert_encoding(const std::string& o_str
                         , nullptr);
 
     return t_str;
+}
+#elif defined (__linux__) || defined(__unix__) || defined(__APPLE__)
+std::string TextFileHelper::convert_encoding(const std::string& o_str
+                                             , const Encoding o_encoding
+                                             , const Encoding t_encoding)
+{
+    const char* o_encoding_str = nullptr;
+    const char* t_encoding_str = nullptr;
+
+    switch (o_encoding)
+    {
+    case Encoding::UTF8:
+        o_encoding_str = "UTF-8";
+        break;
+    case Encoding::GBK:
+        o_encoding_str = "GBK";
+        break;
+    default:
+        std::cerr << "Unsupported original encoding for iconv." << std::endl;
+        return {};
+    }
+
+    switch (t_encoding)
+    {
+    case Encoding::UTF8:
+        t_encoding_str = "UTF-8";
+        break;
+    case Encoding::GBK:
+        t_encoding_str = "GBK";
+        break;
+    default:
+        std::cerr << "Unsupported target encoding for iconv." << std::endl;
+        return {};
+    }
+
+    iconv_t cd = iconv_open(t_encoding_str, o_encoding_str);
+    if (cd == (iconv_t)-1)
+    {
+        std::cerr << "Iconv Error: iconv_open failed: " << strerror(errno) <<
+                std::endl;
+        return {};
+    }
+
+    char* in_buf_ptr = const_cast<char*>(o_str.data());
+    size_t in_bytes_left = o_str.length();
+
+    // Allocate output buffer with an educated guess
+    size_t out_buf_size = in_bytes_left * 2 + 4; // Plus 4 for safety margin
+    std::vector<char> output_bytes(out_buf_size);
+    char* out_buf_ptr = output_bytes.data();
+    size_t out_bytes_left = out_buf_size;
+
+    size_t result = iconv(cd
+                          , &in_buf_ptr
+                          , &in_bytes_left
+                          , &out_buf_ptr
+                          , &out_bytes_left);
+    if (result == (size_t)-1)
+    {
+        std::cerr << "Iconv Error: During conversion: " << strerror(errno) <<
+                std::endl;
+        iconv_close(cd);
+        return {};
+    }
+
+    size_t converted_bytes = out_buf_size - out_bytes_left;
+
+    iconv_close(cd);
+
+    return std::string(output_bytes.data(), converted_bytes);
 }
 #endif
 }

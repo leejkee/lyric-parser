@@ -129,7 +129,7 @@ public:
 
     [[nodiscard]] std::string file_name() const;
 
-    void change_encoding(FileKits::Encoding t_encoding);
+    void change_encoding_utf8(FileKits::Encoding t_encoding);
 
     void print_info() const;
 
