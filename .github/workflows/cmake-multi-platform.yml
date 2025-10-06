@@ -54,15 +54,29 @@ jobs:
 
       - name: Configure CMake (with Tests and Examples)
         # 1. Use -DBUILD_TESTS=ON and -DBUILD_EXAMPLES=ON
-        # 2. Use the correct C compiler from the matrix
+        if: runner.os == 'Windows'
+        shell: powershell # Explicitly set the shell to PowerShell
+        run: |
+          mkdir -p ${{ steps.strings.outputs.build-output-dir }}
+          cmake -B ${{ steps.strings.outputs.build-output-dir }} `
+             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} `
+             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+             -DBUILD_TESTS=ON `
+             -DBUILD_EXAMPLES=ON `
+             -S ${{ github.workspace }}
+
+      - name: Configure CMake (with Tests and Examples)
+      # This step runs on Linux (where the shell is bash)
+        if: runner.os == 'Linux'
+        shell: bash # Explicitly set the shell to Bash (optional, but clearer)
         run: |
           mkdir -p ${{ steps.strings.outputs.build-output-dir }}
           cmake -B ${{ steps.strings.outputs.build-output-dir }} \
-                -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
-                -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-                -DBUILD_TESTS=ON \
-                -DBUILD_EXAMPLES=ON \
-                -S ${{ github.workspace }}
+             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
+             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+             -DBUILD_TESTS=ON \
+             -DBUILD_EXAMPLES=ON \
+             -S ${{ github.workspace }}
 
       - name: Build
         # Build your program and all targets (including tests and examples)
