@@ -5,7 +5,7 @@
 #include <iostream>
 #include <regex>
 
-namespace Badfish::AudioToolkit
+namespace AudioToolkit
 {
 class LyricParserPrivate
 {

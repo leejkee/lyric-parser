@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace Badfish::FileKits
+namespace FileKits
 {
 enum class Encoding
 {
@@ -17,15 +17,20 @@ class TextFileHelper
 {
 public:
     TextFileHelper() = default;
+
     explicit TextFileHelper(std::string_view filePath);
+
     TextFileHelper(const TextFileHelper&) = delete;
+
     TextFileHelper(TextFileHelper&&) = delete;
+
     TextFileHelper& operator=(const TextFileHelper&) = delete;
+
     TextFileHelper& operator=(TextFileHelper&&) = delete;
+
     ~TextFileHelper();
 
     void load_file(std::string_view file_path);
-
 
     [[nodiscard]] std::vector<std::string> get_content() const
     {
@@ -45,13 +50,7 @@ public:
 private:
     std::filesystem::path m_path;
 
-    // Encoding m_encoding{Encoding::UNKNOWN};
-
     std::vector<std::string> m_content;
-
-    // static Encoding detect_str_encoding(const std::string& str);
-
-    // void detect_file_encoding();
 
     bool read_file();
 };

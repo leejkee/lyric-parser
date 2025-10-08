@@ -18,6 +18,9 @@
 #include <string.h>
 #endif
 
+namespace LPTest
+{
+
 ScopedFile::ScopedFile(std::filesystem::path filePath)
     : m_filePath(std::move(filePath))
 {
@@ -232,16 +235,13 @@ bool ScopedFile::write_to_file_iconv(std::string_view content
 bool ScopedFile::write_to_file(const std::vector<std::string>& content_lines
                                , const Encoding encoding)
 {
-    // Concatenate all content lines into a single UTF-8 string
     std::string full_content;
     for (const auto& line : content_lines)
     {
         full_content += line;
         full_content += NEWLINE_CHAR;
-        // Use consistent newline for internal processing
     }
 
-    // Remove the last newline if it's there and content_lines wasn't empty
     if (!full_content.empty() && full_content.back() == '\n')
     {
         full_content.pop_back();
@@ -249,14 +249,12 @@ bool ScopedFile::write_to_file(const std::vector<std::string>& content_lines
 
 
 #if defined(_WIN32) || defined(_WIN64)
-    // On Windows, use WinAPI for encoding conversion
     return write_to_file_winapi(full_content, encoding);
 #elif defined(__linux__) || defined(__unix__) || defined(__APPLE__)
-    // On Linux/Unix-like systems, use iconv
     return write_to_file_iconv(full_content, encoding);
 #else
-    // Fallback for unsupported platforms or compile error if no specific implementation
     std::cerr << "Error: write_to_file not implemented for this platform." << std::endl;
     return false;
 #endif
+}
 }

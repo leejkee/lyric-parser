@@ -9,36 +9,8 @@
 #include <optional>
 
 
-namespace Badfish::AudioToolkit
+namespace AudioToolkit
 {
-/// Enhanced LRC supported
-/// todo
-// struct EnhancedLyricLineInfo
-// {
-//     std::int64_t m_end_ms{0};
-//     std::queue<std::int64_t> m_timing_queue;
-//
-//     explicit EnhancedLyricLineInfo() = default;
-//
-//     explicit EnhancedLyricLineInfo(const std::int64_t end_ms
-//                                    , std::queue<std::int64_t>&& timing_q)
-//         : m_end_ms(end_ms),
-//           m_timing_queue(std::move(timing_q))
-//     {
-//     }
-//
-//     EnhancedLyricLineInfo& operator=(const EnhancedLyricLineInfo& other)
-//     = default;
-//
-//     EnhancedLyricLineInfo& operator=(EnhancedLyricLineInfo&& other) noexcept
-//     {
-//         m_end_ms = other.m_end_ms;
-//         m_timing_queue = std::move(other.m_timing_queue);
-//         return *this;
-//     }
-// };
-/// Enhanced LRC supported
-
 struct LyricLine
 {
     std::optional<int64_t> m_start_ms;

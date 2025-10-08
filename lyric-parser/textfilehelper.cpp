@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <utility>
 
 #if defined (_WIN32) || defined(_WIN64)
 #include <Windows.h>
@@ -14,7 +13,7 @@
 #include <cstring>
 #endif
 
-namespace Badfish::FileKits
+namespace FileKits
 {
 TextFileHelper::TextFileHelper(const std::string_view filePath)
     : m_path{filePath}

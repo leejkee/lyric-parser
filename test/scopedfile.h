@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <vector>
 
+namespace LPTest{
 class ScopedFile
 {
 public:
@@ -38,3 +39,4 @@ private:
     std::filesystem::path m_filePath;
     static constexpr char NEWLINE_CHAR{'\n'};
 };
+}

@@ -6,7 +6,6 @@
 
 int main()
 {
-    using namespace Badfish;
 
     // file with GBK encoding
     const std::string file_1{"../../examples/成全 - 刘若英.lrc"};

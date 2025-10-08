@@ -21,16 +21,16 @@ TEST_CASE("LyricParserNormalTest", "Normal-LRC Test")
         , "标签: 测试标签"
     };
 
-    const std::vector<Badfish::AudioToolkit::LyricLine> expected_content_lines{
+    const std::vector<AudioToolkit::LyricLine> expected_content_lines{
         {1, "Test lyric"}
         , {1010, "歌词测试"}
     };
 
     SECTION("Normal-LRC Test, Encode: UTF8")
     {
-        ScopedFile fileHelper(filename);
-        fileHelper.write_to_file(normal_lrc_toT, ScopedFile::Encoding::UTF8);
-        const Badfish::AudioToolkit::LyricParser lyric_parser{filename};
+        LPTest::ScopedFile fileHelper(filename);
+        fileHelper.write_to_file(normal_lrc_toT, LPTest::ScopedFile::Encoding::UTF8);
+        const AudioToolkit::LyricParser lyric_parser{filename};
         REQUIRE(lyric_parser.is_enhanced() == false);
         REQUIRE(lyric_parser.get_tags() == expected_tags);
         REQUIRE(lyric_parser.get_text() == expected_content_lines);
@@ -38,10 +38,10 @@ TEST_CASE("LyricParserNormalTest", "Normal-LRC Test")
 
     SECTION("Normal-LRC Test, Encode: GBK")
     {
-        ScopedFile fileHelper(filename);
-        fileHelper.write_to_file(normal_lrc_toT, ScopedFile::Encoding::GBK);
-        Badfish::AudioToolkit::LyricParser lyric_parser{filename};
-        lyric_parser.change_encoding_utf8(Badfish::FileKits::Encoding::GBK);
+        LPTest::ScopedFile fileHelper(filename);
+        fileHelper.write_to_file(normal_lrc_toT, LPTest::ScopedFile::Encoding::GBK);
+        AudioToolkit::LyricParser lyric_parser{filename};
+        lyric_parser.change_encoding_utf8(FileKits::Encoding::GBK);
         REQUIRE(lyric_parser.is_enhanced() == false);
         REQUIRE(lyric_parser.get_tags() == expected_tags);
         REQUIRE(lyric_parser.get_text() == expected_content_lines);
@@ -67,7 +67,7 @@ TEST_CASE("LyricParserEnhancedTest", "Enhanced-LRC Test")
         "标签: 诗意歌词测试"
     };
 
-    const std::vector<Badfish::AudioToolkit::LyricLine> expected_content_lines{
+    const std::vector<AudioToolkit::LyricLine> expected_content_lines{
         {5123, "And I remember all my childhood dreams"},
         {8500, "I find it hard to get them out of my mind"},
         {15000, "窗透初晓日照西桥云自摇"},
@@ -78,9 +78,9 @@ TEST_CASE("LyricParserEnhancedTest", "Enhanced-LRC Test")
 
     SECTION("Enhanced-LRC Test, Encode: UTF8")
     {
-        ScopedFile fileHelper(filename);
-        fileHelper.write_to_file(enhanced_lrc_toT, ScopedFile::Encoding::UTF8);
-        const Badfish::AudioToolkit::LyricParser lyric_parser{filename};
+        LPTest::ScopedFile fileHelper(filename);
+        fileHelper.write_to_file(enhanced_lrc_toT, LPTest::ScopedFile::Encoding::UTF8);
+        const AudioToolkit::LyricParser lyric_parser{filename};
 
         REQUIRE(lyric_parser.is_enhanced() == true);
         REQUIRE(lyric_parser.get_tags() == expected_tags);
@@ -89,10 +89,10 @@ TEST_CASE("LyricParserEnhancedTest", "Enhanced-LRC Test")
 
     SECTION("Enhanced-LRC Test, Encode: GBK")
     {
-        ScopedFile fileHelper(filename);
-        fileHelper.write_to_file(enhanced_lrc_toT, ScopedFile::Encoding::GBK);
-        Badfish::AudioToolkit::LyricParser lyric_parser{filename};
-        lyric_parser.change_encoding_utf8(Badfish::FileKits::Encoding::GBK);
+        LPTest::ScopedFile fileHelper(filename);
+        fileHelper.write_to_file(enhanced_lrc_toT, LPTest::ScopedFile::Encoding::GBK);
+        AudioToolkit::LyricParser lyric_parser{filename};
+        lyric_parser.change_encoding_utf8(FileKits::Encoding::GBK);
 
         REQUIRE(lyric_parser.is_enhanced() == true);
         REQUIRE(lyric_parser.get_tags() == expected_tags);
