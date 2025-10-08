@@ -2,14 +2,12 @@
 // Created by 31305 on 25-6-18.
 //
 #pragma once
-#include "textfilehelper.h"
-#include <memory>
 #include <string>
 #include <vector>
 #include <optional>
+#include <regex>
 
-
-namespace AudioToolkit
+namespace AudioToolKits
 {
 struct LyricLine
 {
@@ -24,7 +22,7 @@ struct LyricLine
     {
     }
 
-    LyricLine(const std::int64_t time_ms
+    LyricLine(const int64_t time_ms
               , std::string&& text)
         : m_start_ms(time_ms),
           m_text(std::move(text))
@@ -64,28 +62,21 @@ struct LyricLine
     }
 };
 
-class LyricParserPrivate;
-
 class LyricParser
 {
 public:
-    LyricParser();
-
     explicit LyricParser(std::string_view file_path);
 
     ~LyricParser();
 
-    void parse_lrc();
+    void parse_lrc(const std::vector<std::string>& file_content);
 
-    void load_file(std::string_view file_path);
+    void reload_file(std::string_view file_path);
 
-    static void trim_string(std::string& str);
 
-    static bool is_English(std::string_view str);
+    static int64_t time_to_ms(std::string_view time_str);
 
-    static std::int64_t time_to_ms(std::string_view time_str);
-
-    static std::int64_t time_to_ms(std::string_view min
+    static int64_t time_to_ms(std::string_view min
                                        , std::string_view sec
                                        , std::string_view ms);
 
@@ -99,13 +90,32 @@ public:
 
     void clear_result();
 
-    [[nodiscard]] std::string file_name() const;
+    void change_encoding_utf8();
 
-    void change_encoding_utf8(FileKits::Encoding t_encoding);
-
-    void print_info() const;
+    void print_lyric() const;
 
 private:
-    std::unique_ptr<LyricParserPrivate> d;
+    enum class EnhancedState
+    {
+        Uninitialized, True, False
+    };
+
+    std::vector<LyricLine> m_lyric_vector;
+
+    EnhancedState m_is_enhanced{EnhancedState::Uninitialized};
+
+    inline static const std::regex s_regex_match_tag{R"(\[(.*)\])"};
+
+    inline static const std::regex s_regex_search_enhanced_text{
+        R"(<([^>]+)>(.*?)(?=<|$))"
+    };
+
+    inline static const std::regex s_regex_match_text{
+        R"(\[(\d{1,2}):(\d{1,2})\.(\d{2,3})(?:\.(\d{2,3}))?\](.*))"
+    };
+
+    inline static const std::regex s_regex_match_time{
+        R"((\d{1,2}):(\d{1,2})\.(\d{2,3}))"
+    };
 };
 }

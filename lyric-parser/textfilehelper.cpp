@@ -13,7 +13,7 @@
 #include <cstring>
 #endif
 
-namespace FileKits
+namespace AudioToolKits
 {
 TextFileHelper::TextFileHelper(const std::string_view filePath)
     : m_path{filePath}
@@ -45,7 +45,8 @@ bool TextFileHelper::read_file()
         {
             continue;
         }
-        m_content.emplace_back(read_line);
+        trim_string(read_line);
+        m_content.emplace_back(std::move(read_line));
     }
     if (m_content.empty())
     {
@@ -55,56 +56,31 @@ bool TextFileHelper::read_file()
     return true;
 }
 
-// void TextFileHelper::detect_file_encoding()
-// {
-//     if (m_content.empty())
-//     {
-//         m_encoding = Encoding::UNKNOWN;
-//         return;
-//     }
-//     for (const auto& line : m_content)
-//     {
-//         switch (detect_str_encoding(line))
-//         {
-//         case Encoding::ASCII: {
-//             break;
-//         }
-//         case Encoding::GBK: {
-//             m_encoding = Encoding::GBK;
-//             return;
-//         }
-//         case Encoding::UTF8: {
-//             m_encoding = Encoding::UTF8;
-//             return;
-//         }
-//         default: {
-//             return;
-//         }
-//         }
-//     }
-// }
-//
-//
-// Encoding TextFileHelper::detect_str_encoding(const std::string& str)
-// {
-//     if (is_ascii(str))
-//     {
-//         return Encoding::ASCII;
-//     }
-//     if (const std::string copy_str = convert_encoding(str
-//         , Encoding::GBK
-//         , Encoding::GBK); copy_str == str)
-//     {
-//         return Encoding::GBK;
-//     }
-//     if (const std::string copy_str = convert_encoding(str
-//         , Encoding::UTF8
-//         , Encoding::UTF8); copy_str == str)
-//     {
-//         return Encoding::UTF8;
-//     }
-//     return Encoding::UNKNOWN;
-// }
+void TextFileHelper::trim_string(std::string& str)
+{
+    if (str.length() >= 3 &&
+        static_cast<unsigned char>(str[0]) == 0xEF &&
+        static_cast<unsigned char>(str[1]) == 0xBB &&
+        static_cast<unsigned char>(str[2]) == 0xBF)
+    {
+        str.erase(0, 3); // Remove the 3-byte UTF-8 BOM
+    }
+    str.erase(str.begin()
+              , std::find_if(str.begin()
+                             , str.end()
+                             , [](const unsigned char ch)
+                             {
+                                 return !std::isspace(ch);
+                             }));
+
+    str.erase(std::find_if(str.rbegin()
+                           , str.rend()
+                           , [](const unsigned char ch)
+                           {
+                               return !std::isspace(ch);
+                           }).base()
+              , str.end());
+}
 
 bool TextFileHelper::is_ascii(const std::string& str)
 {
@@ -120,9 +96,6 @@ std::string TextFileHelper::encoding_to_string(const Encoding& encoding)
 {
     switch (encoding)
     {
-        case Encoding::ASCII: {
-            return "ASCII";
-        }
         case Encoding::GBK: {
             return "GBK";
         }
@@ -143,6 +116,15 @@ std::string TextFileHelper::file_name() const
     return m_path.filename().string();
 }
 
+bool TextFileHelper::is_English(const std::string_view str)
+{
+    return std::all_of(str.begin()
+                       , str.end()
+                       , [](const unsigned char ch)
+                       {
+                           return std::isalpha(ch) || ch == '\'';
+                       });
+}
 
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -245,9 +227,7 @@ std::string TextFileHelper::convert_encoding(const std::string& o_str
 
     char* in_buf_ptr = const_cast<char*>(o_str.data());
     size_t in_bytes_left = o_str.length();
-
-    // Allocate output buffer with an educated guess
-    size_t out_buf_size = in_bytes_left * 2 + 4; // Plus 4 for safety margin
+    size_t out_buf_size = in_bytes_left * 2 + 4;
     std::vector<char> output_bytes(out_buf_size);
     char* out_buf_ptr = output_bytes.data();
     size_t out_bytes_left = out_buf_size;
