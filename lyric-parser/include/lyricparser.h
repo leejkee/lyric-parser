@@ -22,7 +22,7 @@ struct LyricLine
     {
     }
 
-    LyricLine(const std::int64_t time_ms
+    LyricLine(const int64_t time_ms
               , std::string&& text)
         : m_start_ms(time_ms),
           m_text(std::move(text))
@@ -74,9 +74,9 @@ public:
     void reload_file(std::string_view file_path);
 
 
-    static std::int64_t time_to_ms(std::string_view time_str);
+    static int64_t time_to_ms(std::string_view time_str);
 
-    static std::int64_t time_to_ms(std::string_view min
+    static int64_t time_to_ms(std::string_view min
                                        , std::string_view sec
                                        , std::string_view ms);
 
