@@ -81,7 +81,7 @@ void LyricParser::parse_lrc()
         , results_match
         , LyricParserPrivate::s_regex_match_text))
     {
-        std::int64_t start_ms = time_to_ms(results_match[1].str()
+        int64_t start_ms = time_to_ms(results_match[1].str()
                                            , results_match[2].str()
                                            , results_match[3].str());
         std::string text = results_match[5].str();
@@ -177,11 +177,11 @@ bool LyricParser::is_enhanced() const
     return d->m_is_enhanced == LyricParserPrivate::EnhancedState::True;
 }
 
-std::int64_t LyricParser::time_to_ms(
+int64_t LyricParser::time_to_ms(
     const std::string_view time_str)
 {
     const std::string str{time_str};
-    std::int64_t result{0};
+    int64_t result{0};
     if (std::smatch time_match; std::regex_match(str
                                                  , time_match
                                                  , LyricParserPrivate::s_regex_match_time))
@@ -193,14 +193,14 @@ std::int64_t LyricParser::time_to_ms(
     return result;
 }
 
-std::int64_t LyricParser::time_to_ms(
+int64_t LyricParser::time_to_ms(
     const std::string_view min
     , const std::string_view sec
     , const std::string_view ms)
 {
-    const std::int64_t time_min{std::stoi(std::string{min})};
-    const std::int64_t time_sec{std::stoi(std::string{sec})};
-    const std::int64_t time_ms{std::stoi(std::string{ms})};
+    const int64_t time_min{std::stoi(std::string{min})};
+    const int64_t time_sec{std::stoi(std::string{sec})};
+    const int64_t time_ms{std::stoi(std::string{ms})};
     return (time_min * 60 + time_sec) * 1000 + time_ms;
 }
 
