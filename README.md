@@ -48,20 +48,18 @@ Add this project as a subdirectory in your project's `CMakeLists.txt` using `add
 
 int main()
 {
-    using namespace Badfish;
+    // file with GBK encoding
+    const std::string file_1{"../../examples/成全 - 刘若英.lrc"};
 
-    // file with `GBK` encoding
-    const std::string file_1{"../../examples/ChengQuan - LiuRuoYing.lrc"};
+    // file with UTF8 encoding
+    const std::string file_2{"../../examples/清明雨上-许嵩.lrc"};
 
-    // file with `UTF-8` encoding
-    const std::string file_2{"../../examples/QingMingYuShang - XuSong.lrc"};
+    AudioToolKits::LyricParser parser(file_1);
+    parser.change_encoding_utf8();
+    parser.print_lyric();
 
-    AudioToolkit::LyricParser parser(file_1);
-    parser.change_encoding(FileKits::Encoding::GBK); // file_1 is `GBK` encoded
-    parser.print_info();
-
-    parser.load_file(file_2); // file_2 is `UTF-8` encoded
-    parser.print_info();
+    parser.reload_file(file_2);
+    parser.print_lyric();
 }
 ```
 
