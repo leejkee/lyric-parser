@@ -6,18 +6,16 @@
 #include <string>
 #include <vector>
 
-namespace FileKits
+namespace AudioToolKits
 {
 enum class Encoding
 {
-    ASCII, UTF8, GBK, UNKNOWN
+    UTF8, GBK, UNKNOWN
 };
 
 class TextFileHelper
 {
 public:
-    TextFileHelper() = default;
-
     explicit TextFileHelper(std::string_view filePath);
 
     TextFileHelper(const TextFileHelper&) = delete;
@@ -47,11 +45,16 @@ public:
                                         , Encoding o_encoding
                                         , Encoding t_encoding);
 
+    static void trim_string(std::string& str);
+
+    static bool is_English(std::string_view str);
+
 private:
     std::filesystem::path m_path;
 
     std::vector<std::string> m_content;
 
     bool read_file();
+
 };
 }

@@ -3,113 +3,73 @@
 //
 #include <lyricparser.h>
 #include <iostream>
-#include <regex>
+#include "textfilehelper.h"
 
-namespace AudioToolkit
+namespace AudioToolKits
 {
-class LyricParserPrivate
-{
-public:
-    enum class EnhancedState
-    {
-        Uninitialized, True, False
-    };
-
-    FileKits::TextFileHelper m_file_helper;
-
-    std::vector<LyricLine> m_lyric_vector;
-
-    EnhancedState m_is_enhanced{EnhancedState::Uninitialized};
-
-    inline static const std::regex s_regex_match_tag{R"(\[(.*)\])"};
-
-    inline static const std::regex s_regex_search_enhanced_text{
-        R"(<([^>]+)>(.*?)(?=<|$))"
-    };
-
-    inline static const std::regex s_regex_match_text{
-        R"(\[(\d{1,2}):(\d{1,2})\.(\d{2,3})(?:\.(\d{2,3}))?\](.*))"
-    };
-
-    inline static const std::regex s_regex_match_time{
-        R"((\d{1,2}):(\d{1,2})\.(\d{2,3}))"
-    };
-};
-
-LyricParser::LyricParser() : d(std::make_unique<LyricParserPrivate>())
-{
-}
-
 LyricParser::LyricParser(const std::string_view file_path)
-    : d(std::make_unique<LyricParserPrivate>())
 {
-    d->m_file_helper.load_file(file_path);
-    parse_lrc();
+    reload_file(file_path);
 }
 
 LyricParser::~LyricParser() = default;
 
-void LyricParser::parse_lrc()
+void LyricParser::parse_lrc(const std::vector<std::string>& file_content)
 {
-    auto original_vector = d->m_file_helper.get_content();
-    if (original_vector.empty())
+    if (file_content.empty())
     {
         std::cerr << "LyricParser::parse_lrc: empty original LRC vector" <<
                 std::endl;
         return;
     }
-    for (auto& str_line : original_vector)
-    {
-        trim_string(str_line);
-    }
 
     std::smatch results_match;
-    auto o_it = original_vector.begin();
+    auto o_it = file_content.begin();
 
     // 1. Tags match
-    while (o_it != original_vector.end() && std::regex_match(*o_it
+    while (o_it != file_content.end() && std::regex_match(*o_it
         , results_match
-        , LyricParserPrivate::s_regex_match_tag))
+        , s_regex_match_tag))
     {
-        d->m_lyric_vector.emplace_back(results_match[1].str());
+        m_lyric_vector.emplace_back(results_match[1].str());
         ++o_it;
     }
     // 1.
 
     // 2. Text match
-    while (o_it != original_vector.end() && std::regex_match(*o_it
+    while (o_it != file_content.end() && std::regex_match(*o_it
         , results_match
-        , LyricParserPrivate::s_regex_match_text))
+        , s_regex_match_text))
     {
         int64_t start_ms = time_to_ms(results_match[1].str()
                                            , results_match[2].str()
                                            , results_match[3].str());
         std::string text = results_match[5].str();
-        trim_string(text);
+        TextFileHelper::trim_string(text);
         std::string result;
-        if (d->m_is_enhanced ==
-            LyricParserPrivate::EnhancedState::Uninitialized)
+        if (m_is_enhanced ==
+            EnhancedState::Uninitialized)
         {
             if (std::regex_search(text
                                   , results_match
-                                  , LyricParserPrivate::s_regex_search_enhanced_text))
+                                  , s_regex_search_enhanced_text))
             {
-                d->m_is_enhanced = LyricParserPrivate::EnhancedState::True;
+                m_is_enhanced = EnhancedState::True;
             }
             else
             {
-                d->m_is_enhanced = LyricParserPrivate::EnhancedState::False;
+                m_is_enhanced = EnhancedState::False;
             }
         }
-        if (d->m_is_enhanced == LyricParserPrivate::EnhancedState::True)
+        if (m_is_enhanced == EnhancedState::True)
         {
             while (std::regex_search(text
                                      , results_match
-                                     , LyricParserPrivate::s_regex_search_enhanced_text))
+                                     , s_regex_search_enhanced_text))
             {
                 std::string match_word = results_match[2].str();
-                trim_string(match_word);
-                if (is_English(match_word))
+                TextFileHelper::trim_string(match_word);
+                if (TextFileHelper::is_English(match_word))
                 {
                     match_word += ' ';
                 }
@@ -121,31 +81,32 @@ void LyricParser::parse_lrc()
                 result.pop_back();
             }
         }
-        else if (d->m_is_enhanced == LyricParserPrivate::EnhancedState::False)
+        else if (m_is_enhanced == EnhancedState::False)
         {
             result = text;
         }
-        d->m_lyric_vector.emplace_back(start_ms, std::move(result));
+        m_lyric_vector.emplace_back(start_ms, std::move(result));
         ++o_it;
     }
     // 2.
 }
 
-void LyricParser::load_file(const std::string_view file_path)
+void LyricParser::reload_file(const std::string_view file_path)
 {
-    d->m_file_helper.load_file(file_path);
     clear_result();
-    parse_lrc();
+    const TextFileHelper text_file{file_path};
+    const auto content = text_file.get_content();
+    parse_lrc(text_file.get_content());
 }
 
 std::vector<LyricLine> LyricParser::get_lrc() const
 {
-    return d->m_lyric_vector;
+    return m_lyric_vector;
 }
 
 std::vector<std::string> LyricParser::get_tags() const{
     std::vector<std::string> tags;
-    for (const auto& line : d->m_lyric_vector)
+    for (const auto& line : m_lyric_vector)
     {
         if (line.isTag())
         {
@@ -160,12 +121,12 @@ std::vector<std::string> LyricParser::get_tags() const{
 
 std::vector<LyricLine> LyricParser::get_text() const{
     std::vector<LyricLine> text;
-    auto it = d->m_lyric_vector.begin();
-    while(it != d->m_lyric_vector.end() && it->isTag())
+    auto it = m_lyric_vector.begin();
+    while(it != m_lyric_vector.end() && it->isTag())
     {
         ++it;
     }
-    for (; it != d->m_lyric_vector.end(); ++it)
+    for (; it != m_lyric_vector.end(); ++it)
     {
         text.emplace_back(*it);
     }
@@ -174,7 +135,7 @@ std::vector<LyricLine> LyricParser::get_text() const{
 
 bool LyricParser::is_enhanced() const
 {
-    return d->m_is_enhanced == LyricParserPrivate::EnhancedState::True;
+    return m_is_enhanced == EnhancedState::True;
 }
 
 int64_t LyricParser::time_to_ms(
@@ -184,7 +145,7 @@ int64_t LyricParser::time_to_ms(
     int64_t result{0};
     if (std::smatch time_match; std::regex_match(str
                                                  , time_match
-                                                 , LyricParserPrivate::s_regex_match_time))
+                                                 , s_regex_match_time))
     {
         result = time_to_ms(time_match[1].str()
                             , time_match[2].str()
@@ -206,73 +167,31 @@ int64_t LyricParser::time_to_ms(
 
 void LyricParser::clear_result()
 {
-    d->m_is_enhanced = LyricParserPrivate::EnhancedState::Uninitialized;
-    d->m_lyric_vector.clear();
+    m_is_enhanced = EnhancedState::Uninitialized;
+    m_lyric_vector.clear();
 }
 
-void LyricParser::trim_string(std::string& str)
+void LyricParser::change_encoding_utf8()
 {
-    if (str.length() >= 3 &&
-        static_cast<unsigned char>(str[0]) == 0xEF &&
-        static_cast<unsigned char>(str[1]) == 0xBB &&
-        static_cast<unsigned char>(str[2]) == 0xBF)
+    if (!m_lyric_vector.empty())
     {
-        str.erase(0, 3); // Remove the 3-byte UTF-8 BOM
-    }
-    str.erase(str.begin()
-              , std::find_if(str.begin()
-                             , str.end()
-                             , [](const unsigned char ch)
-                             {
-                                 return !std::isspace(ch);
-                             }));
-
-    str.erase(std::find_if(str.rbegin()
-                           , str.rend()
-                           , [](const unsigned char ch)
-                           {
-                               return !std::isspace(ch);
-                           }).base()
-              , str.end());
-}
-
-bool LyricParser::is_English(const std::string_view str)
-{
-    return std::all_of(str.begin()
-                       , str.end()
-                       , [](const unsigned char ch)
-                       {
-                           return std::isalpha(ch);
-                       });
-}
-
-std::string LyricParser::file_name() const
-{
-    return d->m_file_helper.file_name();
-}
-
-void LyricParser::change_encoding_utf8(const FileKits::Encoding t_encoding)
-{
-    if (!d->m_lyric_vector.empty())
-    {
-        for (auto& lyric : d->m_lyric_vector)
+        for (auto& lyric : m_lyric_vector)
         {
             if (!lyric.m_text.empty())
             {
                 lyric.m_text =
-                        FileKits::TextFileHelper::convert_encoding(lyric.m_text
-                                , t_encoding
-                                , FileKits::Encoding::UTF8
+                        TextFileHelper::convert_encoding(lyric.m_text
+                                ,Encoding::GBK
+                                , Encoding::UTF8
                             );
             }
         }
     }
 }
 
-void LyricParser::print_info() const
+void LyricParser::print_lyric() const
 {
-    std::cout << "File name: " << file_name() << std::endl;
-    for (const auto& lyric : d->m_lyric_vector)
+    for (const auto& lyric : m_lyric_vector)
     {
         std::cout << lyric.m_text << std::endl;
     }

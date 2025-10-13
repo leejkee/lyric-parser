@@ -3,10 +3,10 @@
 //
 #define CATCH_CONFIG_MAIN
 #include "scopedfile.h"
+#include "catch.hpp"
 #include <lyricparser.h>
-#include <catch.hpp>
 
-TEST_CASE("LyricParserNormalTest", "Normal-LRC Test")
+TEST_CASE("LyricParserChineseNormalTest", "Normal-LRC Test")
 {
     const std::string filename{"test.lyc"};
     const std::vector<std::string> normal_lrc_toT{
@@ -21,7 +21,7 @@ TEST_CASE("LyricParserNormalTest", "Normal-LRC Test")
         , "标签: 测试标签"
     };
 
-    const std::vector<AudioToolkit::LyricLine> expected_content_lines{
+    const std::vector<AudioToolKits::LyricLine> expected_content_lines{
         {1, "Test lyric"}
         , {1010, "歌词测试"}
     };
@@ -30,7 +30,7 @@ TEST_CASE("LyricParserNormalTest", "Normal-LRC Test")
     {
         LPTest::ScopedFile fileHelper(filename);
         fileHelper.write_to_file(normal_lrc_toT, LPTest::ScopedFile::Encoding::UTF8);
-        const AudioToolkit::LyricParser lyric_parser{filename};
+        const AudioToolKits::LyricParser lyric_parser{filename};
         REQUIRE(lyric_parser.is_enhanced() == false);
         REQUIRE(lyric_parser.get_tags() == expected_tags);
         REQUIRE(lyric_parser.get_text() == expected_content_lines);
@@ -40,15 +40,15 @@ TEST_CASE("LyricParserNormalTest", "Normal-LRC Test")
     {
         LPTest::ScopedFile fileHelper(filename);
         fileHelper.write_to_file(normal_lrc_toT, LPTest::ScopedFile::Encoding::GBK);
-        AudioToolkit::LyricParser lyric_parser{filename};
-        lyric_parser.change_encoding_utf8(FileKits::Encoding::GBK);
+        AudioToolKits::LyricParser lyric_parser{filename};
+        lyric_parser.change_encoding_utf8();
         REQUIRE(lyric_parser.is_enhanced() == false);
         REQUIRE(lyric_parser.get_tags() == expected_tags);
         REQUIRE(lyric_parser.get_text() == expected_content_lines);
     }
 }
 
-TEST_CASE("LyricParserEnhancedTest", "Enhanced-LRC Test")
+TEST_CASE("LyricParserChineseEnhancedTest", "Enhanced-LRC Test")
 {
     const std::string filename{"test_enhanced_complex.lyc"};
     const std::vector<std::string> enhanced_lrc_toT{
@@ -67,7 +67,7 @@ TEST_CASE("LyricParserEnhancedTest", "Enhanced-LRC Test")
         "标签: 诗意歌词测试"
     };
 
-    const std::vector<AudioToolkit::LyricLine> expected_content_lines{
+    const std::vector<AudioToolKits::LyricLine> expected_content_lines{
         {5123, "And I remember all my childhood dreams"},
         {8500, "I find it hard to get them out of my mind"},
         {15000, "窗透初晓日照西桥云自摇"},
@@ -80,7 +80,7 @@ TEST_CASE("LyricParserEnhancedTest", "Enhanced-LRC Test")
     {
         LPTest::ScopedFile fileHelper(filename);
         fileHelper.write_to_file(enhanced_lrc_toT, LPTest::ScopedFile::Encoding::UTF8);
-        const AudioToolkit::LyricParser lyric_parser{filename};
+        const AudioToolKits::LyricParser lyric_parser{filename};
 
         REQUIRE(lyric_parser.is_enhanced() == true);
         REQUIRE(lyric_parser.get_tags() == expected_tags);
@@ -91,8 +91,79 @@ TEST_CASE("LyricParserEnhancedTest", "Enhanced-LRC Test")
     {
         LPTest::ScopedFile fileHelper(filename);
         fileHelper.write_to_file(enhanced_lrc_toT, LPTest::ScopedFile::Encoding::GBK);
-        AudioToolkit::LyricParser lyric_parser{filename};
-        lyric_parser.change_encoding_utf8(FileKits::Encoding::GBK);
+        AudioToolKits::LyricParser lyric_parser{filename};
+        lyric_parser.change_encoding_utf8();
+
+        REQUIRE(lyric_parser.is_enhanced() == true);
+        REQUIRE(lyric_parser.get_tags() == expected_tags);
+        REQUIRE(lyric_parser.get_text() == expected_content_lines);
+    }
+}
+TEST_CASE("LyricParserYesterdayOnceMoreNormalTest", "YOM-Normal-LRC Test")
+{
+    const std::string filename{"yom_normal.lyc"};
+    const std::vector<std::string> normal_lrc_toT{
+        "[ar: Carpenters]",
+        "[ti: Yesterday Once More]",
+        "[00:10.500] When I was young I'd listen to the radio",
+        "[00:14.250] Waitin' for my favorite songs",
+        "[00:18.000] When they played I'd sing along",
+        "[00:21.750] It made me smile"
+    };
+
+    const std::vector<std::string> expected_tags{
+        "ar: Carpenters",
+        "ti: Yesterday Once More"
+    };
+
+    const std::vector<AudioToolKits::LyricLine> expected_content_lines{
+        {10500, "When I was young I'd listen to the radio"},
+        {14250, "Waitin' for my favorite songs"},
+        {18000, "When they played I'd sing along"},
+        {21750, "It made me smile"}
+    };
+
+    SECTION("YOM-Normal-LRC Test, Encode: UTF8")
+    {
+        LPTest::ScopedFile fileHelper(filename);
+        fileHelper.write_to_file(normal_lrc_toT, LPTest::ScopedFile::Encoding::UTF8);
+        const AudioToolKits::LyricParser lyric_parser{filename};
+        REQUIRE(lyric_parser.is_enhanced() == false);
+        REQUIRE(lyric_parser.get_tags() == expected_tags);
+        REQUIRE(lyric_parser.get_text() == expected_content_lines);
+    }
+}
+
+TEST_CASE("LyricParserYesterdayOnceMoreEnhancedTest", "YOM-Enhanced-LRC Test")
+{
+    const std::string filename{"yom_enhanced.lyc"};
+    const std::vector<std::string> enhanced_lrc_toT{
+        "[ar: Carpenters]",
+        "[ti: Yesterday Once More]",
+        "[00:10.500] <00:10.500> When <00:10.700> I <00:10.800> was <00:11.000> young <00:11.250> I'd <00:11.400> listen <00:11.800> to <00:11.900> the <00:12.100> radio",
+        "[00:14.250] <00:14.250> Waitin' <00:14.750> for <00:14.900> my <00:15.150> favorite <00:15.700> songs",
+        "[00:18.000] <00:18.000> When <00:18.200> they <00:18.400> played <00:18.700> I'd <00:18.900> sing <00:19.200> along",
+        "[00:21.750] <00:21.750> It <00:22.000> made <00:22.250> me <00:22.500> smile"
+    };
+
+    const std::vector<std::string> expected_tags{
+        "ar: Carpenters",
+        "ti: Yesterday Once More"
+    };
+
+    // The parser is expected to strip the word-level timestamps for the main text line.
+    const std::vector<AudioToolKits::LyricLine> expected_content_lines{
+        {10500, "When I was young I'd listen to the radio"},
+        {14250, "Waitin' for my favorite songs"},
+        {18000, "When they played I'd sing along"},
+        {21750, "It made me smile"}
+    };
+
+    SECTION("YOM-Enhanced-LRC Test, Encode: UTF8")
+    {
+        LPTest::ScopedFile fileHelper(filename);
+        fileHelper.write_to_file(enhanced_lrc_toT, LPTest::ScopedFile::Encoding::UTF8);
+        const AudioToolKits::LyricParser lyric_parser{filename};
 
         REQUIRE(lyric_parser.is_enhanced() == true);
         REQUIRE(lyric_parser.get_tags() == expected_tags);
