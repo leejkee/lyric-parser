@@ -77,11 +77,6 @@ public:
 
     static int64_t time_to_ms(std::string_view time_str);
 
-<<<<<<< HEAD
-    static int64_t time_to_ms(std::string_view time_str);
-
-=======
->>>>>>> 376777115bb2fa29a5e14796eeeef19aa9038605
     static int64_t time_to_ms(std::string_view min
                                        , std::string_view sec
                                        , std::string_view ms);
